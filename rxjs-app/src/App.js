@@ -12,19 +12,19 @@ function App() {
 
   useEffect(()=>{
     numsInterval.subscribe({
-      next: vals=>{
+      next: (vals)=>{
           console.log("n:", vals[0])
           setBuf(vals[0])
       },
-      error: err=>console.log("error:",err),
-      // complete: ()=>console.log("completed"))
+      // error: err=>console.log("error:",err),
     })
-  })
+  }, [])
 
   return (
     <div className="App">
       <Header/>
-      <Body buf={buf} setBuf={setBuf}/>
+      <Body buf={buf}/>
+      {/* <p>{buf}</p> */}
     </div>
   );
 }
