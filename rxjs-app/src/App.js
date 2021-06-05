@@ -5,7 +5,7 @@ import Header from './components/Header'
 import Body from './components/Body'
 
 function App() {
-  const [user, setUser] = useState()
+  const [results, setResults] = useState('')
 
   // useEffect(()=>{
   //   const url = 'https://randomuser.me/api/'
@@ -16,21 +16,37 @@ function App() {
   //   })
   // }, [])
 
-  const handleSubmit = (query)=>{
+  const handleSubmit = (e, query)=>{
+    e.preventDefault()
+
     console.log("handleSubmit()..")
 
+    console.log(query)
+    const proxyUrl = 'http://localhost:3001/'
     const baseUrl = 'https://pixabay.com/api/?key=19443478-73723d2b3ab0b10dc457093b2&q='
     const queryUrl = baseUrl+query
-    const fetch$ = ajax.getJSON(queryUrl)
+
+    const fetch$ = ajax({
+      url: proxyUrl,
+      method: 'POST',
+      body: {
+        'targetUrl': queryUrl
+      }
+    })
+    
     fetch$.subscribe({
-      next: (x)=>console.log(JSON.stringify(x))
+      next: (x)=>{
+        console.log(x)
+        setResults(JSON.stringify(x))
+      },
+      error: (err)=>console.log(err)
     })
   }
 
   return (
     <div className="App">
       <Header/>
-      <Body buf={user} handleSubmit={handleSubmit}/>
+      <Body buf={results} handleSubmit={handleSubmit}/>
       {/* <p>{buf}</p> */}
     </div>
   );
