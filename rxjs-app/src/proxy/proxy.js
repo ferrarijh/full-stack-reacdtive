@@ -13,7 +13,7 @@ app.post('/', (req, res)=>{
     const nodeReq = https.request(targetUrl, nodeRes=>{
         data = ''
         nodeRes.on('data', d=>{
-            console.log('data:', d)
+            // console.log('data:', d)
             data += d
         })
         nodeRes.on('end', ()=>{

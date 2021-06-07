@@ -1,3 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
+
+:root {
+  --img-height: 120px;
+  --img-width: 180px;
+}
+
 header {
   margin-left: auto;
   margin-right: auto;
@@ -5,21 +12,39 @@ header {
 }
 
 p {
-  margin-left: auto;
-  margin-right: auto;
-  width: 8em
+  text-align: center;
+}
+
+.post {
+  float: left;
+  margin: 0.5em;
+  border-radius: 10px;
+  background:#FFFFFF;
+  box-shadow: 0 0 10px 3px #DDD;
+  animation-name: appear;
+  animation-duration: 1s;
+}
+
+.img {
+  width: var(--img-width);
+  height: var(--img-height);
 }
 
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background: #EEEEEE;
+  font-size: 14px;
+  font-family: 'Roboto' sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+@keyframes appear {
+  0% {opacity: 0}
+  100% {opacity: 1}
 }
