@@ -1,7 +1,7 @@
-const Header = ()=>{
+const Header = (props)=>{
     return(
         <header>
-            <h1>Header</h1>
+            <h1>Posts: {props.postLen}</h1>
         </header>
     )
 }
