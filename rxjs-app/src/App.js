@@ -57,7 +57,7 @@ function App() {
     merged$.subscribe({
       next: (p)=>{
         setPosts((prevPosts)=>{
-          console.log(posts.length, p['tags'], p['id'])
+          console.log(p)
           return [...prevPosts, p]
         })
       },
