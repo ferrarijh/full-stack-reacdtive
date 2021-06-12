@@ -4,9 +4,9 @@ const Input = (props)=>{
     const [query, setQuery] = useState('')
 
     return(
-        <div>
-            <form onSubmit={(e)=>props.handleSubmit(e,query)}>
-                <label>Keyword: </label>
+        <div className="mInput">
+            <form onSubmit={props.handleSubmit(query)}>
+                <label>{props.guide}</label>
                 <input type="text" onChange={(e)=>setQuery(e.target.value)}/>
                 <input type="submit" value="Go"/>
             </form>

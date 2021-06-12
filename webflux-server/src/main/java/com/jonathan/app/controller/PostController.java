@@ -3,10 +3,8 @@ package com.jonathan.app.controller;
 import com.jonathan.app.domain.Post;
 import com.jonathan.app.service.PixabayPostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -17,13 +15,16 @@ public class PostController {
 
     private final PixabayPostService service;
 
-    @GetMapping(path="/all")
+    @CrossOrigin
+    @GetMapping(path="/all", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Post> getAllPosts(){
         return service.getAllPosts();
     }
 
-    @GetMapping("/post")
-    public Mono<Post> getPostById(@RequestParam("id") String id){
-        return service.getPostById(id);
+    @CrossOrigin
+    @GetMapping(produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Post> getPostsBy(@RequestParam(value="id", required=false)String id,
+                                   @RequestParam(value="query", required=false)String query){
+        return service.getPostsBy(id, query);
     }
 }

@@ -12,7 +12,7 @@ import {keywords} from './SampleData'
 function App() {
   const [posts, setPosts] = useState([])
 
-  const handleSubmit = (e, query)=>{
+  const handleSubmit = (query) => e => {
     e.preventDefault()
     setPosts([])
 
@@ -66,11 +66,49 @@ function App() {
     })
   }
 
+  const handleSubmitMongo = (query) => (e) =>{
+    e.preventDefault()
+    setPosts([])
+
+    const baseUrl = 'http://localhost:8080/posts';
+    var queryUrl = baseUrl;
+    if(query != '')
+      queryUrl += '/?query='+query
+    else
+      queryUrl += '/all'
+      
+    // from(fetch(queryUrl)
+    //     .then(res=>res.json())
+    //   ).subscribe({
+    //     next: (p)=>{
+    //       console.log("post:",p)
+    //       setPosts((prevPosts)=>{return [...prevPosts, p]});
+    //     },
+    //     error: (err)=>{console.log(err)}
+    //   })
+
+    ajax({
+        url: queryUrl,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'text/event-stream'
+        }
+      })
+      .subscribe({
+            next: (p)=>{
+              console.log(p)
+              setPosts((prevPosts)=>{return [...prevPosts, p]});
+            },
+            error: (err)=>{console.log(err)}
+      })
+
+  }
+
   return (
     <div className="App">
       <Header postLen={posts.length}/>
-      <Input handleSubmit={handleSubmit}/>
-      {/* <Body buf={results} handleSubmit={handleSubmit}/> */}
+      <Input handleSubmit={handleSubmit} guide={'Keyword(from api): '}/>
+      <Input handleSubmit={handleSubmitMongo} guide={'Keyword(from mongo): '}/>
       <Posts posts={posts}/>
     </div>
   );

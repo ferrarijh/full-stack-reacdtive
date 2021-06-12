@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class PixabayPostServiceImpl implements PixabayPostService{
 
-    private PixabayRepository repository;
+    private final PixabayRepository repository;
 
     @Override
     public Flux<Post> getAllPosts() {
@@ -25,7 +25,10 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     @Override
-    public Flux<Post> getPostsByQuery(String query) {
-        return repository.findByQuery(query);
+    public Flux<Post> getPostsBy(String id, String query) {
+        if(id.isEmpty())
+            return repository.findByQuery(query);
+        else
+            return Flux.from(repository.findById(id));
     }
 }

@@ -12,7 +12,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class Post {
     private String id;
-    private String largeImageUrl;
+    private String pageURL;
+    private String tags;
+    private String largeImageURL;
+    private int views;
+    private int favorites;
+    private int likes;
+    private int comments;
     private String user;
+    private String userImageUrl;
+
     private String query;
 }

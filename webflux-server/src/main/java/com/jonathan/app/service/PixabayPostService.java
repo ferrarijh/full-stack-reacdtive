@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
 public interface PixabayPostService {
     public Flux<Post> getAllPosts();
     public Mono<Post> getPostById(String id);
-    public Flux<Post> getPostsByQuery(String query);
+    public Flux<Post> getPostsBy(String id, String query);
 }
