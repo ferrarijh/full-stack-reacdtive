@@ -151,12 +151,16 @@ function App() {
   return (
     <div className="App">
       <Header postLen={posts.length}/>
-      <Input handleSubmit={handleSubmit} guide='Keyword(from api): ' btnValue="Go"/>
-      <Input handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
-      <Input handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
-      <form onSubmit={onTrashBtnClick}>
+      <hr/>
+      <div className="inputContainer">   
+        <Input handleSubmit={handleSubmit} guide='Keyword(from api): ' btnValue="Go"/>
+        <Input handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
+        <Input handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
+      </div> 
+      <form id="trashForm" onSubmit={onTrashBtnClick}>
         <input id="trashBtn" type="submit" value="🗑️" />
       </form>
+      <hr/>
       <Posts posts={posts}/>
     </div>
   );
