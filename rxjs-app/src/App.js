@@ -5,11 +5,16 @@ import {ajax} from 'rxjs/ajax'
 import Header from './components/Header'
 import Input from './components/Input'
 import Posts from './components/Posts'
+import Spinner from './components/Spinner'
 import key from './Key'
 import {keywords} from './SampleData'
 
-
 function App() {
+  const LoadingStatus = Object.freeze({
+    LOADING: "LOADING",
+    DONE: "DONE"
+  })
+  const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.DONE)
   const [posts, setPosts] = useState([])
 
   const handleSubmit = (query) => e => {
@@ -126,6 +131,7 @@ function App() {
   const handleSubmitMongoSync = (query) => (e) => {
     e.preventDefault();
     setPosts([]);
+    setLoadingStatus(LoadingStatus.LOADING)
 
     const baseUrl = 'http://localhost:8080/posts';
     var queryUrl = baseUrl;
@@ -142,7 +148,10 @@ function App() {
       }
     }).subscribe({
       next: (p)=>{
-        setPosts((prevPosts)=>{return [...prevPosts, ...p.response]});
+        setPosts((prevPosts)=>{
+          setLoadingStatus(LoadingStatus.DONE)
+          return [...prevPosts, ...p.response]
+        });
       },
       error: (err)=>{console.log(err)}
     })
@@ -161,6 +170,7 @@ function App() {
         <input id="trashBtn" type="submit" value="🗑️" />
       </form>
       <hr/>
+      {loadingStatus === LoadingStatus.LOADING && <Spinner/>}
       <Posts posts={posts}/>
     </div>
   );
