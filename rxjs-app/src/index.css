@@ -36,6 +36,10 @@ p {
   margin: 1em;
 }
 
+#trashBtn {
+  font-size: 3em;
+}
+
 body {
   background: #EEEEEE;
   font-size: 12px;

@@ -27,4 +27,11 @@ public class PostController {
                                    @RequestParam(value="query", required=false)String query){
         return service.getPostsBy(id, query);
     }
+
+    @CrossOrigin
+    @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<Post> getPostsBlockingBy(@RequestParam(value="id", required=false)String id,
+                                 @RequestParam(value="query", required=false)String query){
+        return service.getPostsBy(id, query);
+    }
 }

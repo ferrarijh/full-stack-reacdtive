@@ -7,6 +7,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +29,17 @@ public class PixabayPostServiceImpl implements PixabayPostService{
 
     @Override
     public Flux<Post> getPostsBy(String id, String query) {
-        if(id.isEmpty())
-            return repository.findByQuery(query);
+
+        Flux<Long> interval = Flux.interval(Duration.ofMillis(20));
+        Flux<Post> posts;
+
+        if(id == "" || id == null)
+            posts = repository.findByQuery(query);
         else
-            return Flux.from(repository.findById(id));
+            posts = Flux.from(repository.findById(id));
+
+        return Flux.zip(posts, interval)
+                .map(Tuple2::getT1);
+//        return posts;
     }
 }

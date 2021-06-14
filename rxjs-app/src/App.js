@@ -66,7 +66,7 @@ function App() {
     })
   }
 
-  const handleSubmitMongo = (query) => (e) =>{
+  const handleSubmitMongoAsync = (query) => (e) =>{
     e.preventDefault()
     setPosts([])
 
@@ -77,38 +77,86 @@ function App() {
     else
       queryUrl += '/all'
       
-    // from(fetch(queryUrl)
-    //     .then(res=>res.json())
-    //   ).subscribe({
-    //     next: (p)=>{
-    //       console.log("post:",p)
-    //       setPosts((prevPosts)=>{return [...prevPosts, p]});
-    //     },
-    //     error: (err)=>{console.log(err)}
+    // from(fetch(queryUrl, {
+    //     method: 'GET',
+    //     headers: {
+    //       'content-type': 'application/json'
+    //     }
+    //   }).then(
+    //     res=>res.json()
+    //   )
+    // ).subscribe({
+    //   next: (p)=>{
+    //     console.log("post:",p)
+    //     setPosts((prevPosts)=>{return [...prevPosts, p]});
+    //   },
+    //   error: (err)=>{console.log(err)}
+    // })
+
+    // ajax({
+    //     url: queryUrl,
+    //     method: 'GET',
+    //     headers: {
+    //       'Content-Type': 'text/event-stream'
+    //     }
+    //   })
+    //   .subscribe({
+    //         next: (p)=>{
+    //           console.log(p)
+    //           setPosts((prevPosts)=>{return [...prevPosts, p]});
+    //         },
+    //         error: (err)=>{console.log(err)}
     //   })
 
-    ajax({
-        url: queryUrl,
-        method: 'GET',
-        headers: {
-          'Content-Type': 'text/event-stream'
-        }
-      })
-      .subscribe({
-            next: (p)=>{
-              console.log(p)
-              setPosts((prevPosts)=>{return [...prevPosts, p]});
-            },
-            error: (err)=>{console.log(err)}
-      })
+    const evtSrc = new EventSource(queryUrl)
+    evtSrc.onmessage = (ev)=>{
+      console.log(ev.data)
+      setPosts((prevPosts)=>[...prevPosts, JSON.parse(ev.data)])
+    }
+    evtSrc.onerror = (err)=>{
+      evtSrc.close()
+    }
+  }
 
+  const onTrashBtnClick = (e) => {
+    e.preventDefault();
+    setPosts([])
+  }
+
+  const handleSubmitMongoSync = (query) => (e) => {
+    e.preventDefault();
+    setPosts([]);
+
+    const baseUrl = 'http://localhost:8080/posts';
+    var queryUrl = baseUrl;
+    if(query != '')
+      queryUrl += '/sync/?query='+query
+    else
+      queryUrl += '/all'
+
+    ajax({
+      url: queryUrl,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).subscribe({
+      next: (p)=>{
+        setPosts((prevPosts)=>{return [...prevPosts, ...p.response]});
+      },
+      error: (err)=>{console.log(err)}
+    })
   }
 
   return (
     <div className="App">
       <Header postLen={posts.length}/>
-      <Input handleSubmit={handleSubmit} guide={'Keyword(from api): '}/>
-      <Input handleSubmit={handleSubmitMongo} guide={'Keyword(from mongo): '}/>
+      <Input handleSubmit={handleSubmit} guide='Keyword(from api): ' btnValue="Go"/>
+      <Input handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
+      <Input handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
+      <form onSubmit={onTrashBtnClick}>
+        <input id="trashBtn" type="submit" value="🗑️" />
+      </form>
       <Posts posts={posts}/>
     </div>
   );
