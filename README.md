@@ -15,9 +15,8 @@ In the left pane react-rxjs app requests mongodb through spring-webflux server  
 
 1. Install mongodb, create collection and and set `application.yaml` (or `application.properties`) of `webflux-server`.
 
-2. Run `webflux-server` app and `rxjs-app`. When mongodb collection is empty `webflux-server` automatically fetches a set of initial data with query keywords from pixabay API and push it to mongodb.
-
-inital query keywords:
+2. Run `webflux-server` app and `rxjs-app`. When mongodb collection is empty `webflux-server` automatically fetches a set of initial data with query keywords from Pixabay API and push it to mongodb. `webflux-server` will request for json dataset to the API with the respective query keywords below and then add `query` field to each json result to finally save it to mongodb.
+   - inital query keywords:
 `"apple", "pie", "tiger", "potato", "banana", "grape", "monkey", "rose", "cherry", "cake"`
 
-##
+3. In the browser(`rxjs-app`) use two `Keyword(from mongo)` input fields to test asynchronous/synchronous request result. Use the above query keywords for each input field.
