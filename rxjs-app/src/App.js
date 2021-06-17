@@ -147,13 +147,28 @@ function App() {
         'Content-Type': 'application/json'
       }
     }).subscribe({
-      next: (p)=>{
+      next: (ajaxRes)=>{
         setPosts((prevPosts)=>{
           setLoadingStatus(LoadingStatus.DONE)
-          return [...prevPosts, ...p.response]
+          return [...prevPosts, ...ajaxRes.response]
         });
       },
       error: (err)=>{console.log(err)}
+    })
+  }
+
+  const onImgClick = (imageUrl)=>{
+    console.log(imageUrl)
+    let baseUrl = 'http://localhost:8080'
+    let path = '/posts/saveImg'
+    let params = '?url='+imageUrl
+    let queryUrl = baseUrl+path+params
+
+    ajax({
+      url: queryUrl,
+      method: 'GET'
+    }).subscribe({
+      next: (ajaxRes)=>console.log(ajaxRes.response)
     })
   }
 
@@ -171,7 +186,7 @@ function App() {
       </form>
       <hr/>
       {loadingStatus === LoadingStatus.LOADING && <Spinner/>}
-      <Posts posts={posts}/>
+      <Posts posts={posts} onImgClick={onImgClick}/>
     </div>
   );
 }

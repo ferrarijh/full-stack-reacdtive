@@ -8,4 +8,5 @@ public interface PixabayPostService {
     public Flux<Post> getAllPosts();
     public Mono<Post> getPostById(String id);
     public Flux<Post> getPostsBy(String id, String query);
+    public Mono<String> saveImage(String url) throws Exception;
 }

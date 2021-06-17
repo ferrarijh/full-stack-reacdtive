@@ -4,7 +4,7 @@ spring:
       host: localhost
       port: 27017
       database: mydb
-
+  img-save-dir: C:\Users\ferra\Downloads\saved\
 logging:
   level:
     org:
