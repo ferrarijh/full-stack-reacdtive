@@ -34,4 +34,4 @@ public class Key {
 
 - Click individual image to save it on your disk. Configure file path in `application.yaml`. This feature was added to test how downloading file works with Spring WebFlux.
 
-The `Keyword(from api)` field is kept for testing.
+The `Keyword(from api)` field shown on the browser is kept for testing.
