@@ -45,5 +45,5 @@ The `Keyword(from api)` field shown on the browser is kept for testing.
 
 ## Issues
 
-To fix error: `'react-scripts' is not recognized as an internal or external command, operable program or batch file`,
+To fix error `'react-scripts' is not recognized as an internal or external command, operable program or batch file` in `rxjs-app`,
 update npm packages with `npm update` command on terminal.
