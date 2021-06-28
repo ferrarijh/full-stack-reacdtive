@@ -3,6 +3,7 @@ import com.jonathan.app.config.DirConfigProperties;
 import com.jonathan.app.domain.Post;
 import com.jonathan.app.repo.PixabayRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +29,7 @@ import java.util.Arrays;
 public class PixabayPostServiceImpl implements PixabayPostService{
 
     private final PixabayRepository repository;
-    private final WebClient client;
+    @Qualifier("imageDownloader") private final WebClient client;
     private final DirConfigProperties properties;
 
     @Override
