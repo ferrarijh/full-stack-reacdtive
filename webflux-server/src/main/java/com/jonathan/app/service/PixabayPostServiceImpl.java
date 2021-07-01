@@ -4,25 +4,19 @@ import com.jonathan.app.domain.Post;
 import com.jonathan.app.repo.PixabayRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.time.Duration;
-import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -38,24 +32,32 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     @Override
+    public Flux<Post> getAllPosts(int page, int size) {
+        return repository.findPage(PageRequest.of(page, size));
+    }
+
+    @Override
     public Mono<Post> getPostById(String id) {
         return repository.findById(id);
     }
 
     @Override
-    public Flux<Post> getPostsBy(String id, String query) {
+    public Flux<Post> getPostsBy(String id, String query, String page, String size) {
 
         Flux<Long> interval = Flux.interval(Duration.ofMillis(20));
         Flux<Post> posts;
 
-        if(id == "" || id == null)
+        if (page != null){
+            int pageInt = Integer.parseInt(page);
+            int sizeInt = (size == null) ? 0 : Integer.parseInt(size);
+            posts = repository.findPage(PageRequest.of(pageInt, sizeInt));
+        }else if (id == "" || id == null)
             posts = repository.findByQuery(query);
         else
             posts = Flux.from(repository.findById(id));
 
         return Flux.zip(posts, interval)
                 .map(Tuple2::getT1);
-//        return posts;
     }
 
     @Override

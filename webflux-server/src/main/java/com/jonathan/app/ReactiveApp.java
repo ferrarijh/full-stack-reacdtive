@@ -40,7 +40,6 @@ public class ReactiveApp{
     private final Gson gson = new Gson();
 
     private final PixabayRepository repo;
-    @Qualifier("imageDownloader") private final WebClient imageDownloader;
     @Qualifier("jsonDownloader") private final WebClient jsonDownloader;
 
     public static void main(String[] args){

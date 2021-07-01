@@ -24,15 +24,18 @@ public class PostController {
     @CrossOrigin
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Post> getPostsBy(@RequestParam(value="id", required=false)String id,
-                                   @RequestParam(value="query", required=false)String query){
-        return service.getPostsBy(id, query);
+                                   @RequestParam(value="query", required=false)String query,
+                                 @RequestParam(value="page", required=false) String page,
+                                 @RequestParam(value="size", required=false) String size
+                                 ){
+        return service.getPostsBy(id, query, page, size);
     }
 
     @CrossOrigin
     @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<Post> getPostsBlockingBy(@RequestParam(value="id", required=false)String id,
                                  @RequestParam(value="query", required=false)String query){
-        return service.getPostsBy(id, query);
+        return service.getPostsBy(id, query, null, null);
     }
 
     @CrossOrigin
@@ -40,4 +43,5 @@ public class PostController {
     public Mono<String> saveImage(@RequestParam(value="url") String url) throws Exception {
         return service.saveImage(url);
     }
+
 }

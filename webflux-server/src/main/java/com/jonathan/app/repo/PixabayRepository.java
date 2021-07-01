@@ -1,8 +1,10 @@
 package com.jonathan.app.repo;
 
 import com.jonathan.app.domain.Post;
+import com.mongodb.lang.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
@@ -13,4 +15,7 @@ import reactor.core.publisher.Mono;
 public interface PixabayRepository extends ReactiveMongoRepository<Post, String> {
     Flux<Post> findByQuery(String q);
     Mono<Long> count();
+
+    @Query("{ id: { $exists: true }}")
+    Flux<Post> findPage(Pageable pageable);
 }
