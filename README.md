@@ -45,5 +45,19 @@ The `Keyword(from api)` field shown on the browser is kept for testing.
 
 ## Issues
 
-To fix error `'react-scripts' is not recognized as an internal or external command, operable program or batch file` in `rxjs-app`,
+- To fix error `'react-scripts' is not recognized as an internal or external command, operable program or batch file` in `rxjs-app`,
 update npm packages with `npm update` command on terminal.
+
+- To fix error `PropertyReferenceException: No property findAll found for type Post` while implementing pagination in `webflux-server`,
+add annotation on top of repository method like below.
+
+```java
+@Repository
+public interface PixabayRepository extends ReactiveMongoRepository<Post, String> {
+    
+    //...
+    
+    @Query("{ id: { $exists: true }}")
+    Flux<Post> findPage(Pageable pageable);
+}
+```
