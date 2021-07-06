@@ -35,6 +35,8 @@ export default key
    - inital query keywords:
 `"apple", "pie", "tiger", "potato", "banana", "grape", "monkey", "rose", "cherry", "cake"`
 
+*Note: Images will NOT be loaded on the browser after several hours, since the image url provided from Pixabay API changes from time to time. So when you don't see the images being loaded but you want them back, you have to empty your collection and the rerun `webflux-server` application to refresh the image urls.*
+
 6. In the browser(`rxjs-app`) use two `Keyword(from mongo)` input fields to test asynchronous/synchronous request result. Use the above query keywords for each input field.
 
 ## Additional features
