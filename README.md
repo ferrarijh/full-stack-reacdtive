@@ -1,5 +1,5 @@
-# Full Stack Reactive Application
-Full stack reactive app with React, Rxjs, Spring WebFlux, MongoDB. Pixabay API key is required to fetch initial data from the API and push it to MongoDB.
+# Full Stack Reactive Project
+Full stack reactive project with apps implementing React, Rxjs, Spring WebFlux, MongoDB. Pixabay API key is required to fetch initial data from the API and push it to MongoDB. The project consists of React application and Spring application. Additionally, MongoDB is required to run full simulation.
 
 ## Demo
 
