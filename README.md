@@ -25,7 +25,7 @@ public class Key {
 3. In `rxjs-app`, create `Key` class with `key` value and export it as default.
 ```javascript
 //Key.js
-const key = "19443478-73723d2b3ab0b10dc457093b2"
+const key = ${your-key-here}
 export default key
 ```
 
