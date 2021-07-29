@@ -15,7 +15,7 @@ const ApiInput = (props) => {
                 <div><label>Page({'>'}1): </label></div>
                 <div><input type="text" onChange={(e)=>setPage(e.target.value)}/></div>
                 
-                <div><label>Size per page(3-20): </label></div>
+                <div><label>Size per page(3-200): </label></div>
                 <div><input type="text" onChange={(e)=>setSize(e.target.value)}/></div>
                 
                 <input type="submit" value={props.btnValue}/>

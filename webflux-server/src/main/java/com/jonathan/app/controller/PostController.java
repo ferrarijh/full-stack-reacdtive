@@ -49,8 +49,8 @@ public class PostController {
     }
 
     @CrossOrigin
-    @GetMapping(path="/updatePosts")
-    public Mono<String> updatePosts(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
+    @GetMapping(path="/updatePosts", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Post> updatePosts(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
         return service.fetchPosts(paramsMap);
     }
 }

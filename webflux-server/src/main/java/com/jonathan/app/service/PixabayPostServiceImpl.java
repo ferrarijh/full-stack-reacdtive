@@ -103,7 +103,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     @Override
-    public Mono<String> fetchPosts(MultiValueMap<String, String> paramsMap) throws Exception {
+    public Flux<Post> fetchPosts(MultiValueMap<String, String> paramsMap) throws Exception {
 //        logger.info(String.valueOf(paramsMap.get("keywords").size()));
 
         String rearParams = paramsStringExceptKeyword(paramsMap);
@@ -127,8 +127,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
                             .getAsJsonArray();
                     List<Post> list = gson.fromJson(jsonArray, type);
                     return repository.saveAll(list);
-                }).count()
-                .map(Object::toString);
+                });
     }
 
     public String paramsStringExceptKeyword(MultiValueMap<String, String> params){

@@ -17,7 +17,7 @@ function App() {
   })
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.DONE)
   const [posts, setPosts] = useState([])
-  const [baseUrl, setBaseUrl] = useState('')
+  const [baseUrl, setBaseUrl] = useState('http://localhost:8080/posts')
 
   const handleSubmit = (query) => e => {
     e.preventDefault()
@@ -151,10 +151,27 @@ function App() {
     keywords.forEach( k => mUrl += 'keywords=' + k + '&')
     mUrl += 'page='+p+"&per_page="+sz
 
-    ajax({
-      url: mUrl,
-      method: 'GET'
-    }).subscribe();
+    // ajax({
+    //   url: mUrl,
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // }).subscribe({
+    //   next: (ajaxRes)=>{
+    //     console.log(ajaxRes.response)
+    //     setPosts((prevPosts)=>{return [...prevPosts, JSON.parse(ajaxRes.response)]})
+    //   }
+    // });
+
+    const evtSrc = new EventSource(mUrl)
+    evtSrc.onmessage = (ev)=>{
+      console.log(ev.data)
+      setPosts((prevPosts)=>[...prevPosts, JSON.parse(ev.data)])
+    }
+    evtSrc.onerror = (err)=>{
+      evtSrc.close()
+    }
   }
 
   return (
@@ -162,13 +179,12 @@ function App() {
       <Header postLen={posts.length}/>
       <div className="baseUrlContainer">
         <label>Base URL: </label>
-        <input type="text" defaultValue="http://localhost:8080" onChange={(e)=>setBaseUrl(e.target.value)}/>
+        <input type="text" defaultValue="http://localhost:8080/posts" onChange={(e)=>setBaseUrl(e.target.value)}/>
       </div>
       <hr/>
       <div className="containers">
-        <div className="mongoInputContainer">   
-          {/* <Input handleSubmit={handleSubmit} guide='Keyword(from api): ' btnValue="Go"/> */}
-          <text className='inputGuide'><i>Query mongo db</i></text>
+        <div className="mongoInputContainer">
+          <text className='inputGuide'><i>Query mongo db.</i></text>
           <MongoInput handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
           <MongoInput handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
         </div> 

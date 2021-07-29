@@ -14,5 +14,5 @@ public interface PixabayPostService {
     public Mono<Post> getPostById(String id);
     public Flux<Post> getPostsBy(String id, String query, String page, String size);
     public Mono<String> saveImage(String url) throws Exception;
-    public Mono<String> fetchPosts(MultiValueMap<String, String> map) throws Exception;
+    public Flux<Post> fetchPosts(MultiValueMap<String, String> map) throws Exception;
 }
