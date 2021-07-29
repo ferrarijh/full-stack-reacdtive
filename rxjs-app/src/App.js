@@ -1,9 +1,10 @@
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import {EMPTY, from, zip, interval} from 'rxjs'
-import {map, mergeMap, mergeWith} from 'rxjs/operators'
+import {mergeMap, mergeWith} from 'rxjs/operators'
 import {ajax} from 'rxjs/ajax'
 import Header from './components/Header'
-import Input from './components/Input'
+import MongoInput from './components/MongoInput'
+import ApiInput from './components/ApiInput'
 import Posts from './components/Posts'
 import Spinner from './components/Spinner'
 import key from './Key'
@@ -16,6 +17,7 @@ function App() {
   })
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.DONE)
   const [posts, setPosts] = useState([])
+  const [baseUrl, setBaseUrl] = useState('')
 
   const handleSubmit = (query) => e => {
     e.preventDefault()
@@ -81,37 +83,6 @@ function App() {
       queryUrl += '/?query='+query
     else
       queryUrl += '/all'
-      
-    // from(fetch(queryUrl, {
-    //     method: 'GET',
-    //     headers: {
-    //       'content-type': 'application/json'
-    //     }
-    //   }).then(
-    //     res=>res.json()
-    //   )
-    // ).subscribe({
-    //   next: (p)=>{
-    //     console.log("post:",p)
-    //     setPosts((prevPosts)=>{return [...prevPosts, p]});
-    //   },
-    //   error: (err)=>{console.log(err)}
-    // })
-
-    // ajax({
-    //     url: queryUrl,
-    //     method: 'GET',
-    //     headers: {
-    //       'Content-Type': 'text/event-stream'
-    //     }
-    //   })
-    //   .subscribe({
-    //         next: (p)=>{
-    //           console.log(p)
-    //           setPosts((prevPosts)=>{return [...prevPosts, p]});
-    //         },
-    //         error: (err)=>{console.log(err)}
-    //   })
 
     const evtSrc = new EventSource(queryUrl)
     evtSrc.onmessage = (ev)=>{
@@ -172,17 +143,41 @@ function App() {
     })
   }
 
+  const handleUpdate = (q, p, sz)=>(e)=>{
+    e.preventDefault()
+    let keywords = q.split(',')
+
+    var mUrl = baseUrl + '/updatePosts?';
+    keywords.forEach( k => mUrl += 'keywords=' + k + '&')
+    mUrl += 'page='+p+"&per_page="+sz
+
+    ajax({
+      url: mUrl,
+      method: 'GET'
+    }).subscribe();
+  }
+
   return (
     <div className="App">
       <Header postLen={posts.length}/>
+      <div className="baseUrlContainer">
+        <label>Base URL: </label>
+        <input type="text" defaultValue="http://localhost:8080" onChange={(e)=>setBaseUrl(e.target.value)}/>
+      </div>
       <hr/>
-      <div className="inputContainer">   
-        <Input handleSubmit={handleSubmit} guide='Keyword(from api): ' btnValue="Go"/>
-        <Input handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
-        <Input handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
-      </div> 
+      <div className="containers">
+        <div className="mongoInputContainer">   
+          {/* <Input handleSubmit={handleSubmit} guide='Keyword(from api): ' btnValue="Go"/> */}
+          <text className='inputGuide'><i>Query mongo db</i></text>
+          <MongoInput handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
+          <MongoInput handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
+        </div> 
+        <div className="apiInputContainer">
+          <ApiInput handleSubmit={handleUpdate} guide='Query keyword(s): ' btnValue="Update"/>
+        </div>
+      </div>
       <form id="trashForm" onSubmit={onTrashBtnClick}>
-        <input id="trashBtn" type="submit" value="🗑️" />
+        <input id="trashBtn" type="submit" value="Empty Result 🗑️" />
       </form>
       <hr/>
       {loadingStatus === LoadingStatus.LOADING && <Spinner/>}

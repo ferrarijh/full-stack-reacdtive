@@ -1,8 +1,6 @@
 const Header = (props)=>{
     return(
-        <header>
-            <h1>Posts: {props.postLen}</h1>
-        </header>
+            <h1>Query Result Count: {props.postLen}</h1>
     )
 }
 

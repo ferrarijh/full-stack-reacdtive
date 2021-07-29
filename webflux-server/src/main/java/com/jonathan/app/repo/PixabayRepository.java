@@ -13,7 +13,9 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface PixabayRepository extends ReactiveMongoRepository<Post, String> {
-    Flux<Post> findByQuery(String q);
+    @Query("{ tags: {$regex : ?0}}")
+    Flux<Post> findByTag(String tag);
+
     Mono<Long> count();
 
     @Query("{ id: { $exists: true }}")

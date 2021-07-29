@@ -1,17 +1,13 @@
 package com.jonathan.app;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jonathan.app.config.DirConfigProperties;
+import com.jonathan.app.config.ConfigProperties;
 import com.jonathan.app.domain.Post;
-import com.jonathan.app.reactiveclient.ReactiveClient;
 import com.jonathan.app.repo.PixabayRepository;
 import com.jonathan.app.service.PixabayPostService;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,17 +16,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@EnableConfigurationProperties(DirConfigProperties.class)
+@EnableConfigurationProperties(ConfigProperties.class)
 @SpringBootApplication
 @RequiredArgsConstructor
 public class ReactiveApp{
@@ -46,7 +39,7 @@ public class ReactiveApp{
         SpringApplication.run(ReactiveApp.class, args);
     }
 
-    @Bean
+//    @Bean
     public CommandLineRunner commandLineRunner(PixabayPostService svc) {
 
         //Check availability of data.

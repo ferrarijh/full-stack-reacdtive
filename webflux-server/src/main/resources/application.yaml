@@ -4,7 +4,10 @@ spring:
       host: localhost
       port: 27017
       database: mydb
+pixabay:
   img-save-dir: C:\Users\ferra\Downloads\saved\
+  base-url: https://pixabay.com/api
+
 logging:
   level:
     org:
@@ -14,3 +17,5 @@ logging:
           mongodb:
             core:
               MongoTemplate: DEBUG
+
+
