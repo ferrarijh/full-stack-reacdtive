@@ -7,7 +7,7 @@ const ApiInput = (props) => {
 
     return (
         <div className="mInput">
-            <text className="inputGuide"><i>Save fetched result from api to mongo db.</i></text>
+            <label className="inputGuide"><i>Save fetched result from api to mongo db.</i></label>
             <form onSubmit={props.handleSubmit(queries, page, size)}>
                 <div><label>{props.guide}</label></div>
                 <div><input type="text" onChange={(e)=>setQuery(e.target.value)}/></div>

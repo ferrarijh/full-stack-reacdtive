@@ -1,6 +1,4 @@
 import {useState} from 'react'
-import {EMPTY, from, zip, interval} from 'rxjs'
-import {mergeMap, mergeWith} from 'rxjs/operators'
 import {ajax} from 'rxjs/ajax'
 import Header from './components/Header'
 import MongoInput from './components/MongoInput'
@@ -11,67 +9,15 @@ import key from './Key'
 import {keywords} from './SampleData'
 
 function App() {
+
   const LoadingStatus = Object.freeze({
     LOADING: "LOADING",
     DONE: "DONE"
   })
+
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.DONE)
   const [posts, setPosts] = useState([])
   const [baseUrl, setBaseUrl] = useState('http://localhost:8080/posts')
-
-  const handleSubmit = (query) => e => {
-    e.preventDefault()
-    setPosts([])
-
-    console.log("handleSubmit()..")
-
-    let per_page = query
-    const proxyUrl = 'http://localhost:3001/'
-    const queryUrl = 'https://pixabay.com/api/?key='+key+'&per_page='+per_page+'&q='
-
-    //emits json element
-    const observables$ = keywords.map((k)=>{
-      return from(fetch(proxyUrl, {
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              'targetUrl': queryUrl + k
-            })
-          }).then(res=>res.json())
-        )
-        // return ajax({
-        //   url: proxyUrl,
-        //   method: 'POST',
-        //   body: {
-        //     'targetUrl': queryUrl + k
-        //   }
-        // })
-        .pipe(
-          // map(jsonRes => jsonRes['response']['hits']),
-          mergeMap(jsonRes => {
-            return from(jsonRes['hits'])
-          })
-        )
-    })
-
-    const merged$ = EMPTY.pipe(
-        mergeWith(...observables$)
-    )
-
-    merged$.subscribe({
-      next: (p)=>{
-        setPosts((prevPosts)=>{
-          console.log(p)
-          return [...prevPosts, p]
-        })
-      },
-      // next: (newPosts)=>{setPosts((prevPosts)=>[...prevPosts, ...newPosts])},
-      error: (err)=>{ console.log(err) }
-    })
-  }
 
   const handleSubmitMongoAsync = (query) => (e) =>{
     e.preventDefault()
@@ -79,7 +25,7 @@ function App() {
 
     const baseUrl = 'http://localhost:8080/posts';
     var queryUrl = baseUrl;
-    if(query != '')
+    if(query !== '')
       queryUrl += '/?query='+query
     else
       queryUrl += '/all'
@@ -104,9 +50,8 @@ function App() {
     setPosts([]);
     setLoadingStatus(LoadingStatus.LOADING)
 
-    const baseUrl = 'http://localhost:8080/posts';
-    var queryUrl = baseUrl;
-    if(query != '')
+    var queryUrl = baseUrl
+    if(query !== '')
       queryUrl += '/sync/?query='+query
     else
       queryUrl += '/all'
@@ -119,9 +64,10 @@ function App() {
       }
     }).subscribe({
       next: (ajaxRes)=>{
+        console.log(JSON.parse(JSON.stringify(ajaxRes.response)))
         setPosts((prevPosts)=>{
           setLoadingStatus(LoadingStatus.DONE)
-          return [...prevPosts, ...ajaxRes.response]
+          return [...prevPosts, ...JSON.parse(JSON.stringify(ajaxRes.response))]
         });
       },
       error: (err)=>{console.log(err)}
@@ -130,8 +76,7 @@ function App() {
 
   const onImgClick = (imageUrl)=>{
     console.log(imageUrl)
-    let baseUrl = 'http://localhost:8080'
-    let path = '/posts/saveImg'
+    let path = '/saveImg'
     let params = '?url='+imageUrl
     let queryUrl = baseUrl+path+params
 
@@ -184,7 +129,7 @@ function App() {
       <hr/>
       <div className="containers">
         <div className="mongoInputContainer">
-          <text className='inputGuide'><i>Query mongo db.</i></text>
+          <label className='inputGuide'><i>Query mongo db.</i></label>
           <MongoInput handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
           <MongoInput handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
         </div> 

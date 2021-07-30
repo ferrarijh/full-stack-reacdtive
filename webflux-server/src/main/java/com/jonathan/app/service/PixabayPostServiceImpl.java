@@ -55,7 +55,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     @Override
-    public Flux<Post> getPostsBy(String id, String tag, String page, String size) {
+    public Flux<Post> getPostsBy(String tag, String page, String size) {
 
         Flux<Long> interval = Flux.interval(Duration.ofMillis(20));
         Flux<Post> posts;
@@ -64,10 +64,8 @@ public class PixabayPostServiceImpl implements PixabayPostService{
             int pageInt = Integer.parseInt(page);
             int sizeInt = (size == null) ? 0 : Integer.parseInt(size);
             posts = repository.findPage(PageRequest.of(pageInt, sizeInt));
-        }else if (id == "" || id == null)
+        }else
             posts = repository.findByTag(tag);
-        else
-            posts = Flux.from(repository.findById(id));
 
         return Flux.zip(posts, interval)
                 .map(Tuple2::getT1);
