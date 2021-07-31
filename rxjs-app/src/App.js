@@ -1,12 +1,9 @@
 import {useState} from 'react'
 import {ajax} from 'rxjs/ajax'
-import Header from './components/Header'
 import MongoInput from './components/MongoInput'
 import ApiInput from './components/ApiInput'
 import Posts from './components/Posts'
 import Spinner from './components/Spinner'
-import key from './Key'
-import {keywords} from './SampleData'
 
 function App() {
 
@@ -17,14 +14,13 @@ function App() {
 
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.DONE)
   const [posts, setPosts] = useState([])
-  const [baseUrl, setBaseUrl] = useState('http://localhost:8080/posts')
+  const [springBaseUrl, setSpringBaseUrl] = useState('http://localhost:8080/posts')
 
   const handleSubmitMongoAsync = (query) => (e) =>{
     e.preventDefault()
     setPosts([])
 
-    const baseUrl = 'http://localhost:8080/posts';
-    var queryUrl = baseUrl;
+    var queryUrl = springBaseUrl;
     if(query !== '')
       queryUrl += '/?query='+query
     else
@@ -50,7 +46,7 @@ function App() {
     setPosts([]);
     setLoadingStatus(LoadingStatus.LOADING)
 
-    var queryUrl = baseUrl
+    var queryUrl = springBaseUrl
     if(query !== '')
       queryUrl += '/sync/?query='+query
     else
@@ -78,7 +74,7 @@ function App() {
     console.log(imageUrl)
     let path = '/saveImg'
     let params = '?url='+imageUrl
-    let queryUrl = baseUrl+path+params
+    let queryUrl = springBaseUrl+path+params
 
     ajax({
       url: queryUrl,
@@ -88,13 +84,18 @@ function App() {
     })
   }
 
-  const handleUpdate = (q, p, sz)=>(e)=>{
+  const handleUpdate = (key, q, p, sz)=>(e)=>{
     e.preventDefault()
+    if(springBaseUrl === '' || key === '' || q === '')
+      return
+    
+    setPosts([])
+    setLoadingStatus(LoadingStatus.LOADING)
     let keywords = q.split(',')
 
-    var mUrl = baseUrl + '/updatePosts?';
+    var mUrl = springBaseUrl + '/updatePosts?'
     keywords.forEach( k => mUrl += 'keywords=' + k + '&')
-    mUrl += 'page='+p+"&per_page="+sz
+    mUrl += 'page='+p+"&per_page="+sz+"&key="+key
 
     // ajax({
     //   url: mUrl,
@@ -111,6 +112,7 @@ function App() {
 
     const evtSrc = new EventSource(mUrl)
     evtSrc.onmessage = (ev)=>{
+      setLoadingStatus(LoadingStatus.DONE)
       console.log(ev.data)
       setPosts((prevPosts)=>[...prevPosts, JSON.parse(ev.data)])
     }
@@ -121,11 +123,7 @@ function App() {
 
   return (
     <div className="App">
-      <Header postLen={posts.length}/>
-      <div className="baseUrlContainer">
-        <label>Base URL: </label>
-        <input type="text" defaultValue="http://localhost:8080/posts" onChange={(e)=>setBaseUrl(e.target.value)}/>
-      </div>
+      <h1>Query Result Count: {posts.length}</h1>
       <hr/>
       <div className="containers">
         <div className="mongoInputContainer">
@@ -133,9 +131,7 @@ function App() {
           <MongoInput handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
           <MongoInput handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
         </div> 
-        <div className="apiInputContainer">
-          <ApiInput handleSubmit={handleUpdate} guide='Query keyword(s): ' btnValue="Update"/>
-        </div>
+        <ApiInput handleSubmit={handleUpdate} guide='Query keyword(s): ' springBaseUrl={springBaseUrl} setSpringBaseUrl={setSpringBaseUrl} btnValue="Update"/>
       </div>
       <form id="trashForm" onSubmit={onTrashBtnClick}>
         <input id="trashBtn" type="submit" value="Empty Result 🗑️" />

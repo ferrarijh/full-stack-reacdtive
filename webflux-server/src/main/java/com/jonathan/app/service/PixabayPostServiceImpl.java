@@ -90,8 +90,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
                                 try{
                                     fos.write(bytes);
                                     fos.close();
-                                }
-                                catch (Exception e) {e.printStackTrace();}
+                                } catch (Exception e) {e.printStackTrace();}
                             }
                     ).map(bytes -> "Saved "+bytes.length+" bytes.");
         }catch(Exception e){
@@ -129,7 +128,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     public String paramsStringExceptKeyword(MultiValueMap<String, String> params){
-        StringBuilder sb = new StringBuilder().append("key=").append(key).append("&");
+        StringBuilder sb = new StringBuilder();
         params.forEach((k, list)->{
             if(!k.equals("keywords"))
                 sb.append(k).append("=").append(list.get(0)).append("&");

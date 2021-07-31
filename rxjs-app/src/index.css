@@ -43,12 +43,17 @@ div.containers {
   height: var(--img-height);
 }
 
-.baseUrlContainer {
+.baseUrlKeyContainer {
   margin: 1em;
 }
 
 .inputGuide {
   color: #AAA
+}
+
+.spin {
+  animation-name: spin;
+  animation-duration: 1s;
 }
 
 #trashBtn {
@@ -87,6 +92,23 @@ code {
   height: 120px;
   -webkit-animation: spin 2s linear infinite; /* Safari */
   animation: spin 2s linear infinite;
+}
+
+.bounce-in {
+  animation: bounce-in 2s;
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% { transform: scale(.9); }
+  100% { transform: scale(1); }
 }
 
 /* Safari */
