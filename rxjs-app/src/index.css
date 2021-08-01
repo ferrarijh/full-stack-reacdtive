@@ -18,6 +18,11 @@ div.containers {
   display: flex;
 }
 
+.header {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
 .mongoInputContainer {
   width: fit-content;
   margin: 1em;
@@ -98,17 +103,29 @@ code {
   animation: bounce-in 2s;
 }
 
+.bounce {
+  display: inline-block;
+  height: fit-content;
+  animation: bounce .7s infinite ease-in-out;
+}
+
 @keyframes bounce-in {
   0% {
     opacity: 0;
-    transform: scale(.3);
+    -webkit-transform: scale(.3);
   }
   50% {
     opacity: 1;
-    transform: scale(1.05);
+    -webkit-transform: scale(1);
   }
-  70% { transform: scale(.9); }
-  100% { transform: scale(1); }
+  70% { -webkit-transform: scale(.9); }
+  100% { -webkit-transform: scale(1); }
+}
+
+@keyframes bounce {
+  60% {
+       -webkit-transform: translate(0px, -10px);
+  }
 }
 
 /* Safari */

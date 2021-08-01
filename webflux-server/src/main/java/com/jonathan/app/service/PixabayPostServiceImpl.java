@@ -1,7 +1,5 @@
 package com.jonathan.app.service;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.jonathan.app.Key;
 import com.jonathan.app.config.ConfigProperties;
@@ -25,6 +23,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,6 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     @Qualifier("imageDownloader") private final WebClient imageDownloader;
     @Qualifier("jsonDownloader") private final WebClient jsonDownloader;
     private final ConfigProperties properties;
-    private final String key = Key.KEY;
-
     @Override
     public Flux<Post> getAllPosts() {
         return repository.findAll();
@@ -100,7 +99,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     @Override
-    public Flux<Post> fetchPosts(MultiValueMap<String, String> paramsMap) throws Exception {
+    public Flux<Post> fetchPosts(MultiValueMap<String, String> paramsMap){
 //        logger.info(String.valueOf(paramsMap.get("keywords").size()));
 
         String rearParams = paramsStringExceptKeyword(paramsMap);
@@ -122,10 +121,26 @@ public class PixabayPostServiceImpl implements PixabayPostService{
                             .getAsJsonObject()
                             .get("hits")
                             .getAsJsonArray();
+
+                    Iterator<JsonElement> iter = jsonArray.iterator();
+                    while(iter.hasNext()){
+                        JsonObject obj = iter.next().getAsJsonObject();
+                        String[] tags = obj.get("tags").getAsString().split(", ");
+                        obj.remove("tags");
+                        JsonArray tagsJsonArr = new JsonArray();
+                        for(String tag: tags)
+                            tagsJsonArr.add(tag);
+                        obj.add("tags", tagsJsonArr);
+                    }
                     List<Post> list = gson.fromJson(jsonArray, type);
                     return repository.saveAll(list);
                 });
     }
+
+    @Override
+    public Mono<String> getAllPostsCount(){
+        return repository.count().map(Object::toString);
+    };
 
     public String paramsStringExceptKeyword(MultiValueMap<String, String> params){
         StringBuilder sb = new StringBuilder();

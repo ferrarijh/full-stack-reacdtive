@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Data
 @Document(collection="pixabaypost")
 @AllArgsConstructor
@@ -13,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Post {
     private String id;
     private String pageURL;
-    private String tags;
+    private List<String> tags;
     private String largeImageURL;
     private int views;
     private int favorites;

@@ -1,16 +1,12 @@
 import {useState} from 'react'
 import {ajax} from 'rxjs/ajax'
+import Header from './components/Header'
 import MongoInput from './components/MongoInput'
 import ApiInput from './components/ApiInput'
 import Posts from './components/Posts'
-import Spinner from './components/Spinner'
+import LoadingStatus from './LoadingStatus'
 
 function App() {
-
-  const LoadingStatus = Object.freeze({
-    LOADING: "LOADING",
-    DONE: "DONE"
-  })
 
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.DONE)
   const [posts, setPosts] = useState([])
@@ -123,22 +119,22 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Query Result Count: {posts.length}</h1>
+      <Header postsLength={posts.length} baseUrl={springBaseUrl}/>
       <hr/>
       <div className="containers">
         <div className="mongoInputContainer">
-          <label className='inputGuide'><i>Query mongo db.</i></label>
+          <h2>Query Mongo DB</h2>
+          <label className='inputGuide'><i>Query mongo db for locally saved posts.</i></label>
           <MongoInput handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
           <MongoInput handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
         </div> 
-        <ApiInput handleSubmit={handleUpdate} guide='Query keyword(s): ' springBaseUrl={springBaseUrl} setSpringBaseUrl={setSpringBaseUrl} btnValue="Update"/>
+        <ApiInput handleSubmit={handleUpdate} guide='Query keyword(s): ' springBaseUrl={springBaseUrl} setSpringBaseUrl={setSpringBaseUrl}/>
       </div>
       <form id="trashForm" onSubmit={onTrashBtnClick}>
         <input id="trashBtn" type="submit" value="Empty Result 🗑️" />
       </form>
       <hr/>
-      {loadingStatus === LoadingStatus.LOADING && <Spinner/>}
-      <Posts posts={posts} onImgClick={onImgClick}/>
+      <Posts posts={posts} loadingStatus={loadingStatus} onImgClick={onImgClick}/>
     </div>
   );
 }

@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("posts/")
+@RequestMapping("posts")
 public class PostController {
 
     private final PixabayPostService service;
@@ -34,11 +34,11 @@ public class PostController {
         return service.getPostsBy(query, page, size);
     }
 
-    @CrossOrigin
-    @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<Post> getPostsBlockingBy(@RequestParam(value="query", required=false)String query){
-        return service.getPostsBy(query, null, null);
-    }
+//    @CrossOrigin
+//    @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Flux<Post> getPostsBlockingBy(@RequestParam(value="query", required=false)String query){
+//        return service.getPostsBy(query, null, null);
+//    }
 
     @CrossOrigin
     @GetMapping(path="/saveImage")
@@ -49,6 +49,18 @@ public class PostController {
     @CrossOrigin
     @GetMapping(path="/updatePosts", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Post> updatePosts(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
+        return service.fetchPosts(paramsMap);
+    }
+
+    @CrossOrigin
+    @GetMapping(path="/count", produces=MediaType.TEXT_HTML_VALUE)
+    public Mono<String> countPosts(){
+        return service.getAllPostsCount();
+    }
+
+    @CrossOrigin
+    @GetMapping(path="/updatePostsSync", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<Post> updatePostsBlocking(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
         return service.fetchPosts(paramsMap);
     }
 }

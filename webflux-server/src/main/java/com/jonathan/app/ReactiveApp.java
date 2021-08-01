@@ -29,56 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ReactiveApp{
 
     private final Logger logger = LoggerFactory.getLogger(ReactiveApp.class);
-    private final String key = Key.KEY;
-    private final Gson gson = new Gson();
-
-    private final PixabayRepository repo;
-    @Qualifier("jsonDownloader") private final WebClient jsonDownloader;
 
     public static void main(String[] args){
         SpringApplication.run(ReactiveApp.class, args);
-    }
-
-//    @Bean
-    public CommandLineRunner commandLineRunner(PixabayPostService svc) {
-
-        //Check availability of data.
-        //If mongoDb is empty then fetch data from $baseUrl with each keyword from the list below and save it to db.
-        Mono<Long> dataSizeMono = repo.count().filter(sz -> sz == 0);
-
-        List<String> keywords = Arrays.asList("apple", "pie", "tiger", "potato", "banana", "grape", "monkey", "rose", "cherry", "cake");
-
-        AtomicInteger cnt = new AtomicInteger();
-
-        return args -> {
-            dataSizeMono.subscribe(
-                    (num)->{
-                        repo.count().subscribe(n->logger.info("Number of data: "+n));
-                        keywords.forEach(keyword->{
-                            savePixabayElement(keyword, cnt);
-                        });
-                    }
-            );
-        };
-    }
-
-    private void savePixabayElement(String keyword, AtomicInteger cnt){
-        jsonDownloader.get()
-                .uri("/?key="+key+"&per_page=200&q="+keyword)
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(jsonStr -> JsonParser.parseString(jsonStr).getAsJsonObject()
-                        .getAsJsonArray("hits")
-                ).subscribe(
-                jsonArr -> {
-                    jsonArr.forEach(jsonElement -> {
-                        JsonObject newObj = jsonElement.getAsJsonObject();
-                        newObj.addProperty("query", keyword);
-                        repo.save(gson.fromJson(newObj, Post.class)).subscribe();
-                        cnt.incrementAndGet();
-                    });
-                    logger.info("cnt: "+cnt);
-                }
-        );
     }
 }
