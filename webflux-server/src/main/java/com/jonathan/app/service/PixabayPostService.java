@@ -17,4 +17,5 @@ public interface PixabayPostService {
     public Flux<Post> fetchPosts(MultiValueMap<String, String> map);
 //    public Flux<Post> fetchPostsBlocking(MultiValueMap<String, String> map);
     public Mono<String> getAllPostsCount();
+    public Mono<Void> deleteAllPosts();
 }

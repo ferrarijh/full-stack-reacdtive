@@ -67,4 +67,10 @@ public class PostController {
         logger.info("updatePostsBlocking...");
         return service.fetchPosts(paramsMap);
     }
+
+    @CrossOrigin
+    @DeleteMapping(path="/delete/all")
+    public Mono<Void> deleteAllPosts(){
+        return service.deleteAllPosts();
+    }
 }

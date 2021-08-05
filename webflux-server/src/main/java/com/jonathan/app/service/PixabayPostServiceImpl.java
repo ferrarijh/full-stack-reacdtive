@@ -152,6 +152,11 @@ public class PixabayPostServiceImpl implements PixabayPostService{
         return repository.count().map(Object::toString);
     };
 
+    @Override
+    public Mono<Void> deleteAllPosts() {
+        return repository.deleteAll();
+    }
+
     public String paramsStringExceptKeyword(MultiValueMap<String, String> params){
         StringBuilder sb = new StringBuilder();
         params.forEach((k, list)->{
