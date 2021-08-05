@@ -3,6 +3,8 @@ package com.jonathan.app.controller;
 import com.jonathan.app.domain.Post;
 import com.jonathan.app.service.PixabayPostService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import java.util.Map;
 @RequestMapping("posts")
 public class PostController {
 
+    private final Logger logger = LoggerFactory.getLogger(PostController.class);
     private final PixabayPostService service;
 
     @CrossOrigin
@@ -34,11 +37,11 @@ public class PostController {
         return service.getPostsBy(query, page, size);
     }
 
-//    @CrossOrigin
-//    @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Flux<Post> getPostsBlockingBy(@RequestParam(value="query", required=false)String query){
-//        return service.getPostsBy(query, null, null);
-//    }
+    @CrossOrigin
+    @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<Post> getPostsBlockingBy(@RequestParam(value="query", required=false)String query){
+        return service.getPostsBy(query, null, null);
+    }
 
     @CrossOrigin
     @GetMapping(path="/saveImage")
@@ -59,8 +62,9 @@ public class PostController {
     }
 
     @CrossOrigin
-    @GetMapping(path="/updatePostsSync", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path="/updatePosts/sync", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<Post> updatePostsBlocking(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
+        logger.info("updatePostsBlocking...");
         return service.fetchPosts(paramsMap);
     }
 }

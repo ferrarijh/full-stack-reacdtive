@@ -1,5 +1,7 @@
-import {useState} from 'react'
-import {ajax} from 'rxjs/ajax'
+import { useState } from 'react'
+import { ajax } from 'rxjs/ajax'
+import { Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
 import Header from './components/Header'
 import MongoInput from './components/MongoInput'
 import ApiInput from './components/ApiInput'
@@ -12,24 +14,50 @@ function App() {
   const [posts, setPosts] = useState([])
   const [springBaseUrl, setSpringBaseUrl] = useState('http://localhost:8080/posts')
 
-  const handleSubmitMongoAsync = (query) => (e) =>{
+  const sseObservable = (url)=>{
+    return new Observable(subscriber => {
+      const es = new EventSource(url)
+      es.onmessage = ev => subscriber.next(ev.data)
+      es.onerror = ev => subscriber.error()
+
+      return () => es.close() 
+    }).pipe(
+      map(data => JSON.parse('['+data+']'))
+    )
+  }
+
+  const ajaxObservable = (url)=>{
+    return ajax({
+      url: url,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).pipe(
+      map(ajaxRes => JSON.parse(JSON.stringify(ajaxRes.response)))
+    )
+  }
+
+  const handleSubmitMongoAsync = (query) => (e) => {
     e.preventDefault()
     setPosts([])
+    setLoadingStatus(LoadingStatus.LOADING)
 
     var queryUrl = springBaseUrl;
-    if(query !== '')
-      queryUrl += '/?query='+query
+    if (query !== '')
+      queryUrl += '/?query=' + query
     else
       queryUrl += '/all'
 
-    const evtSrc = new EventSource(queryUrl)
-    evtSrc.onmessage = (ev)=>{
-      console.log(ev.data)
-      setPosts((prevPosts)=>[...prevPosts, JSON.parse(ev.data)])
-    }
-    evtSrc.onerror = (err)=>{
-      evtSrc.close()
-    }
+    const observable$ = sseObservable(queryUrl)
+
+    observable$.subscribe({
+      next: jsonArr => { 
+        setLoadingStatus(LoadingStatus.DONE)
+        setPosts((prevPosts) => [...prevPosts, ...jsonArr]) 
+      },
+      error: err => console.log(err)
+    })
   }
 
   const onTrashBtnClick = (e) => {
@@ -43,98 +71,79 @@ function App() {
     setLoadingStatus(LoadingStatus.LOADING)
 
     var queryUrl = springBaseUrl
-    if(query !== '')
-      queryUrl += '/sync/?query='+query
+    if (query !== '')
+      queryUrl += '/sync/?query=' + query
     else
       queryUrl += '/all'
 
-    ajax({
-      url: queryUrl,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).subscribe({
-      next: (ajaxRes)=>{
-        console.log(JSON.parse(JSON.stringify(ajaxRes.response)))
-        setPosts((prevPosts)=>{
-          setLoadingStatus(LoadingStatus.DONE)
-          return [...prevPosts, ...JSON.parse(JSON.stringify(ajaxRes.response))]
-        });
+    const observable$ = ajaxObservable(queryUrl)
+    observable$.subscribe({
+      next: (jsonArr) => {
+        setLoadingStatus(LoadingStatus.DONE)
+        setPosts((prevPosts) =>  [...prevPosts, ...jsonArr]);
       },
-      error: (err)=>{console.log(err)}
+      error: err => console.log(err)
     })
   }
 
-  const onImgClick = (imageUrl)=>{
+  const onImgClick = (imageUrl) => {
     console.log(imageUrl)
     let path = '/saveImg'
-    let params = '?url='+imageUrl
-    let queryUrl = springBaseUrl+path+params
+    let params = '?url=' + imageUrl
+    let queryUrl = springBaseUrl + path + params
 
     ajax({
       url: queryUrl,
       method: 'GET'
     }).subscribe({
-      next: (ajaxRes)=>console.log(ajaxRes.response)
+      next: (ajaxRes) => console.log(ajaxRes.response)
     })
   }
 
-  const handleUpdate = (key, q, p, sz)=>(e)=>{
+  const handleUpdate = (options) => (e) => {
     e.preventDefault()
-    if(springBaseUrl === '' || key === '' || q === '')
+    if (springBaseUrl === '' || options.key === '' || options.queries === '')
       return
-    
+
     setPosts([])
     setLoadingStatus(LoadingStatus.LOADING)
-    let keywords = q.split(',')
+    let keywords = options.queries.split(',')
 
-    var mUrl = springBaseUrl + '/updatePosts?'
-    keywords.forEach( k => mUrl += 'keywords=' + k + '&')
-    mUrl += 'page='+p+"&per_page="+sz+"&key="+key
+    var queryUrl = springBaseUrl + '/updatePosts' + (options.syncOrAsync==='sync' ? '/sync' : '') + '?'
+    keywords.forEach(k => queryUrl += 'keywords=' + k + '&')
+    queryUrl += 'page=' + options.page + "&per_page=" + options.size + "&key=" + options.key
 
-    // ajax({
-    //   url: mUrl,
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // }).subscribe({
-    //   next: (ajaxRes)=>{
-    //     console.log(ajaxRes.response)
-    //     setPosts((prevPosts)=>{return [...prevPosts, JSON.parse(ajaxRes.response)]})
-    //   }
-    // });
+    let observable$ = options.syncOrAsync === 'async' ? sseObservable(queryUrl) : ajaxObservable(queryUrl)
 
-    const evtSrc = new EventSource(mUrl)
-    evtSrc.onmessage = (ev)=>{
-      setLoadingStatus(LoadingStatus.DONE)
-      console.log(ev.data)
-      setPosts((prevPosts)=>[...prevPosts, JSON.parse(ev.data)])
-    }
-    evtSrc.onerror = (err)=>{
-      evtSrc.close()
-    }
+    observable$.subscribe({
+      next: data => {
+        setLoadingStatus(LoadingStatus.DONE)
+        setPosts((prevPosts) => [...prevPosts, ...data])
+      },
+      error: err => console.log(err)
+    })
   }
 
   return (
     <div className="App">
-      <Header postsLength={posts.length} baseUrl={springBaseUrl}/>
-      <hr/>
+      <Header postsLength={posts.length} baseUrl={springBaseUrl} />
+      <hr />
       <div className="containers">
+
         <div className="mongoInputContainer">
           <h2>Query Mongo DB</h2>
           <label className='inputGuide'><i>Query mongo db for locally saved posts.</i></label>
-          <MongoInput handleSubmit={handleSubmitMongoAsync} guide='Keyword(from mongo): ' btnValue="Go Async"/>
-          <MongoInput handleSubmit={handleSubmitMongoSync} guide='Keyword(from mongo): ' btnValue="Go Sync"/>
-        </div> 
-        <ApiInput handleSubmit={handleUpdate} guide='Query keyword(s): ' springBaseUrl={springBaseUrl} setSpringBaseUrl={setSpringBaseUrl}/>
+          <MongoInput handleSubmit={handleSubmitMongoAsync} guide='Keyword: ' btnValue="Query Async" />
+          <MongoInput handleSubmit={handleSubmitMongoSync} guide='Keyword: ' btnValue="Query Sync" />
+        </div>
+
+        <ApiInput handleSubmit={handleUpdate} guide='Query keyword(s): ' springBaseUrl={springBaseUrl} setSpringBaseUrl={setSpringBaseUrl} />
       </div>
       <form id="trashForm" onSubmit={onTrashBtnClick}>
         <input id="trashBtn" type="submit" value="Empty Result 🗑️" />
       </form>
-      <hr/>
-      <Posts posts={posts} loadingStatus={loadingStatus} onImgClick={onImgClick}/>
+      <hr />
+      <Posts posts={posts} loadingStatus={loadingStatus} onImgClick={onImgClick} />
     </div>
   );
 }

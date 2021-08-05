@@ -38,9 +38,11 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     @Qualifier("imageDownloader") private final WebClient imageDownloader;
     @Qualifier("jsonDownloader") private final WebClient jsonDownloader;
     private final ConfigProperties properties;
+
     @Override
     public Flux<Post> getAllPosts() {
-        return repository.findAll();
+        Flux<Long> interval = Flux.interval(Duration.ofMillis(30));
+        return Flux.zip(repository.findAll(), interval).map(Tuple2::getT1);
     }
 
     @Override
@@ -56,8 +58,15 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     @Override
     public Flux<Post> getPostsBy(String tag, String page, String size) {
 
-        Flux<Long> interval = Flux.interval(Duration.ofMillis(20));
+        Flux<Long> interval = Flux.interval(Duration.ofMillis(30));
         Flux<Post> posts;
+
+        logger.info("tag: "+tag);
+
+        if(tag == null)
+            logger.info("tag is null.");
+        else if (tag == "")
+            logger.info("tag is empty.");
 
         if (page != null){
             int pageInt = Integer.parseInt(page);
@@ -101,6 +110,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     @Override
     public Flux<Post> fetchPosts(MultiValueMap<String, String> paramsMap){
 //        logger.info(String.valueOf(paramsMap.get("keywords").size()));
+        Flux<Long> interval = Flux.interval(Duration.ofMillis(30));
 
         String rearParams = paramsStringExceptKeyword(paramsMap);
         Type type = new TypeToken<List<Post>>(){}.getType();
