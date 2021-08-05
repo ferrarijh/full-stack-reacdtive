@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Map;
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("posts")
@@ -52,7 +49,7 @@ public class PostController {
     @CrossOrigin
     @GetMapping(path="/updatePosts", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Post> updatePosts(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
-        return service.fetchPosts(paramsMap);
+        return service.updatePosts(paramsMap);
     }
 
     @CrossOrigin
@@ -65,7 +62,9 @@ public class PostController {
     @GetMapping(path="/updatePosts/sync", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<Post> updatePostsBlocking(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
         logger.info("updatePostsBlocking...");
-        return service.fetchPosts(paramsMap);
+        return service.updatePosts(paramsMap);
+//        TODO("bean of type 'com.jonathan.app.repo.PixabayRepositoryBlocking' that could not be found.")
+//        return service.updatePostsBlocking(paramsMap);
     }
 
     @CrossOrigin

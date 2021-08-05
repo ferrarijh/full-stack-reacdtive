@@ -60,10 +60,10 @@ const ApiInput = (props) => {
                 <div><label>Size per page(3-200): </label></div>
                 <div><input type="number" min="3" max="200" defaultValue="20" onChange={(e)=>setSize(e.target.value)}/></div>
                 
-                {/* <input type="radio" id="async" value="async" onClick={e=>setSyncOrAsync(e.target.value)} name="queryType" />
+                <input type="radio" id="async" value="async" onClick={e=>setSyncOrAsync(e.target.value)} name="queryType" />
                 <label htmlFor="async">async</label>
                 <input type="radio" id="sync" value="sync" onClick={e=>setSyncOrAsync(e.target.value)} name="queryType"/>
-                <label htmlFor="sync">sync</label> */}
+                <label htmlFor="sync">sync</label>
                 
                 <br/><input type="submit" value="Update and Fetch" onClick={()=>setAnimateState('bounce-in')}/>
             </form>

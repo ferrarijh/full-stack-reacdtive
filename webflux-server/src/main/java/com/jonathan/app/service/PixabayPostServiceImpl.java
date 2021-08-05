@@ -5,6 +5,7 @@ import com.jonathan.app.Key;
 import com.jonathan.app.config.ConfigProperties;
 import com.jonathan.app.domain.Post;
 import com.jonathan.app.repo.PixabayRepository;
+import com.jonathan.app.repo.PixabayRepositoryBlocking;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +29,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class PixabayPostServiceImpl implements PixabayPostService{
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private final PixabayRepositoryBlocking blockingRepository;
     private final PixabayRepository repository;
     @Qualifier("imageDownloader") private final WebClient imageDownloader;
     @Qualifier("jsonDownloader") private final WebClient jsonDownloader;
@@ -108,10 +111,8 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     @Override
-    public Flux<Post> fetchPosts(MultiValueMap<String, String> paramsMap){
+    public Flux<Post> updatePosts(MultiValueMap<String, String> paramsMap){
 //        logger.info(String.valueOf(paramsMap.get("keywords").size()));
-        Flux<Long> interval = Flux.interval(Duration.ofMillis(30));
-
         String rearParams = paramsStringExceptKeyword(paramsMap);
         Type type = new TypeToken<List<Post>>(){}.getType();
         Gson gson = new Gson();
@@ -145,6 +146,45 @@ public class PixabayPostServiceImpl implements PixabayPostService{
                     List<Post> list = gson.fromJson(jsonArray, type);
                     return repository.saveAll(list);
                 });
+    }
+
+    public List<Post> updatePostsBlocking(MultiValueMap<String, String> paramsMap){
+        String rearParams = paramsStringExceptKeyword(paramsMap);
+        Type type = new TypeToken<List<Post>>(){}.getType();
+        Gson gson = new Gson();
+
+        List<Post> res = new ArrayList<>();
+
+        paramsMap.get("keywords").stream()
+            .map(k -> {
+                String path = "/?q=" + k + "&" + rearParams;
+                return jsonDownloader.get()
+                        .uri(properties.getBaseUrl() + path)
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+            }).forEach(str -> {
+                JsonArray jsonArray = JsonParser.parseString(str)
+                        .getAsJsonObject()
+                        .get("hits")
+                        .getAsJsonArray();
+
+                Iterator<JsonElement> iter = jsonArray.iterator();
+                while(iter.hasNext()){
+                    JsonObject obj = iter.next().getAsJsonObject();
+                    String[] tags = obj.get("tags").getAsString().split(", ");
+                    obj.remove("tags");
+                    JsonArray tagsJsonArr = new JsonArray();
+                    for(String tag: tags)
+                        tagsJsonArr.add(tag);
+                    obj.add("tags", tagsJsonArr);
+                }
+                List<Post> list = gson.fromJson(jsonArray, type);
+                blockingRepository.saveAll(list);
+                res.addAll(list);
+            });
+
+        return res;
     }
 
     @Override
