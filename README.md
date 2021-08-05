@@ -4,40 +4,28 @@ Full stack reactive project with apps implementing React, Rxjs, Spring WebFlux, 
 ## Demo
 
 <div>
-	<img src="https://github.com/ferrarijh/full-stack-reactive/blob/master/demo/demo.gif">
+	<img src="https://github.com/ferrarijh/full-stack-reactive/blob/master/demo/demo-1.gif">
 </div>
 
-In the left pane react-rxjs app requests mongodb through spring-webflux server  asynchronously, while in the right the request is handled synchronously.
+In the left pane react-rxjs app requests mongodb through spring-webflux server asynchronously, while in the right the request is handled synchronously.
 
 ## How to simulate
 
 1. Sign in at [Pixabay API](https://pixabay.com/service/about/api/) and get API key. 
 
-2. In `webflux-server` project, create `Key` class and put your API key in the `KEY` field.
-```java
-package com.jonathan.app;
+2. Install mongodb, create collection and and set `application.yaml` (or `application.properties`) of `webflux-server`.
 
-public class Key {
-    public static String KEY = ${your-key-here};
-}
-```
+3. Run `webflux-server` app and `rxjs-app`. 
 
-3. In `rxjs-app`, create `Key` class with `key` value and export it as default.
-```javascript
-//Key.js
-const key = ${your-key-here}
-export default key
-```
+*Note: Images will NOT be loaded on the browser after several hours, since the valid image urls that Pixabay API provide changes periodically. So when you don't see the images being loaded and you want them back, you have to empty your MongoDB collection first and then rerun `webflux-server` application to refresh the image urls in the DB.*
 
-4. Install mongodb, create collection and and set `application.yaml` (or `application.properties`) of `webflux-server`.
+4. Fill in the respective inputs in the browser(`rxjs-app`) and update your DB.
+ - "Base URL" field: base url for your spring application.
+ - "Key" field: your Pixabay API key.
+ - "Query Keyword(s)" field: your query keyword(s). Separate each keywords with comma(,).
+ - "Page" field: target page to query to the API. (Results are paginated in Pixabay API)
 
-5. Run `webflux-server` app and `rxjs-app`. When mongodb collection is empty `webflux-server` automatically fetches a set of initial data with query keywords from Pixabay API and push it to mongodb. `webflux-server` will request for json dataset to the API with the respective query keywords below and then add `query` field to each json result to finally save it to mongodb.
-   - inital query keywords:
-`"apple", "pie", "tiger", "potato", "banana", "grape", "monkey", "rose", "cherry", "cake"`
-
-*Note: Images will NOT be loaded on the browser after several hours, since the image urls that Pixabay API provide changes from time to time. So when you don't see the images being loaded and you want them back, you have to empty your MongoDB collection first and then rerun `webflux-server` application to refresh the image urls in the DB.*
-
-6. In the browser(`rxjs-app`) use two `Keyword(from mongo)` input fields to test asynchronous/synchronous request result. Use the above query keywords for each input field.
+5. Query Mongo db synchronously or asynchronously with single keyword. DB will collect all the documents that include your keyword in the value array of "tag" property.
 
 ## Additional features
 
