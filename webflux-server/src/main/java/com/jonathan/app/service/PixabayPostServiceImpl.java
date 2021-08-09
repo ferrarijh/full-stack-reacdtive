@@ -1,4 +1,6 @@
 package com.jonathan.app.service;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.jonathan.app.Key;
@@ -18,6 +20,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 
 import java.io.File;
@@ -41,6 +44,7 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     @Qualifier("imageDownloader") private final WebClient imageDownloader;
     @Qualifier("jsonDownloader") private final WebClient jsonDownloader;
     private final ConfigProperties properties;
+    private final Gson gson;
 
     @Override
     public Flux<Post> getAllPosts() {
@@ -59,27 +63,9 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     }
 
     @Override
-    public Flux<Post> getPostsBy(String tag, String page, String size) {
-
-        Flux<Long> interval = Flux.interval(Duration.ofMillis(30));
-        Flux<Post> posts;
-
-        logger.info("tag: "+tag);
-
-        if(tag == null)
-            logger.info("tag is null.");
-        else if (tag == "")
-            logger.info("tag is empty.");
-
-        if (page != null){
-            int pageInt = Integer.parseInt(page);
-            int sizeInt = (size == null) ? 0 : Integer.parseInt(size);
-            posts = repository.findPage(PageRequest.of(pageInt, sizeInt));
-        }else
-            posts = repository.findByTag(tag);
-
-        return Flux.zip(posts, interval)
-                .map(Tuple2::getT1);
+    public Flux<Post> getPostsByTag(MultiValueMap<String, String> keywordsMap) {
+        return Flux.fromIterable(keywordsMap.get("keywords"))
+                .flatMap(repository::findByTag);
     }
 
     @Override
@@ -114,77 +100,41 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     public Flux<Post> updatePosts(MultiValueMap<String, String> paramsMap){
 //        logger.info(String.valueOf(paramsMap.get("keywords").size()));
         String rearParams = paramsStringExceptKeyword(paramsMap);
-        Type type = new TypeToken<List<Post>>(){}.getType();
-        Gson gson = new Gson();
 
-        List<Mono<String>> monoList = paramsMap.get("keywords").stream()
-                .map(k -> {
+        return Flux.fromIterable(paramsMap.get("keywords"))     //Flux<String>
+                .flatMap(k -> {
                     String path = "/?q=" + k + "&" + rearParams;
                     return jsonDownloader.get()
                             .uri(properties.getBaseUrl() + path)
                             .retrieve()
-                            .bodyToMono(String.class);
-                }).collect(Collectors.toList());
-
-        return Flux.merge(monoList)
-                .flatMap(str -> {
-                    JsonArray jsonArray = JsonParser.parseString(str)
-                            .getAsJsonObject()
-                            .get("hits")
-                            .getAsJsonArray();
-
-                    Iterator<JsonElement> iter = jsonArray.iterator();
-                    while(iter.hasNext()){
-                        JsonObject obj = iter.next().getAsJsonObject();
-                        String[] tags = obj.get("tags").getAsString().split(", ");
-                        obj.remove("tags");
-                        JsonArray tagsJsonArr = new JsonArray();
-                        for(String tag: tags)
-                            tagsJsonArr.add(tag);
-                        obj.add("tags", tagsJsonArr);
-                    }
-                    List<Post> list = gson.fromJson(jsonArray, type);
-                    return repository.saveAll(list);
+                            .bodyToMono(String.class)
+                            .flatMapMany(str -> {
+                                List<Post> list = postsListFromStr(str);
+                                return repository.saveAll(list);
+                            });
                 });
     }
 
-    public List<Post> updatePostsBlocking(MultiValueMap<String, String> paramsMap){
-        String rearParams = paramsStringExceptKeyword(paramsMap);
+    private List<Post> postsListFromStr(String str){
         Type type = new TypeToken<List<Post>>(){}.getType();
-        Gson gson = new Gson();
 
-        List<Post> res = new ArrayList<>();
+        JsonArray jsonArray = JsonParser.parseString(str)
+                .getAsJsonObject()
+                .get("hits")
+                .getAsJsonArray();
 
-        paramsMap.get("keywords").stream()
-            .map(k -> {
-                String path = "/?q=" + k + "&" + rearParams;
-                return jsonDownloader.get()
-                        .uri(properties.getBaseUrl() + path)
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .block();
-            }).forEach(str -> {
-                JsonArray jsonArray = JsonParser.parseString(str)
-                        .getAsJsonObject()
-                        .get("hits")
-                        .getAsJsonArray();
+        Iterator<JsonElement> iter = jsonArray.iterator();
+        while(iter.hasNext()){
+            JsonObject obj = iter.next().getAsJsonObject();
+            String[] tags = obj.get("tags").getAsString().split(", ");
+            obj.remove("tags");
+            JsonArray tagsJsonArr = new JsonArray();
+            for(String tag: tags)
+                tagsJsonArr.add(tag);
+            obj.add("tags", tagsJsonArr);
+        }
 
-                Iterator<JsonElement> iter = jsonArray.iterator();
-                while(iter.hasNext()){
-                    JsonObject obj = iter.next().getAsJsonObject();
-                    String[] tags = obj.get("tags").getAsString().split(", ");
-                    obj.remove("tags");
-                    JsonArray tagsJsonArr = new JsonArray();
-                    for(String tag: tags)
-                        tagsJsonArr.add(tag);
-                    obj.add("tags", tagsJsonArr);
-                }
-                List<Post> list = gson.fromJson(jsonArray, type);
-                blockingRepository.saveAll(list);
-                res.addAll(list);
-            });
-
-        return res;
+        return gson.fromJson(jsonArray, type);
     }
 
     @Override
@@ -195,6 +145,35 @@ public class PixabayPostServiceImpl implements PixabayPostService{
     @Override
     public Mono<Void> deleteAllPosts() {
         return repository.deleteAll();
+    }
+
+    @Override
+    public Mono<List<Post>> updatePostsBlocking(MultiValueMap<String, String> paramsMap){
+        String rearParams = paramsStringExceptKeyword(paramsMap);
+
+        return Flux.fromIterable(paramsMap.get("keywords"))
+                .flatMap(k -> {
+                    String path = "/?q=" + k + "&" + rearParams;
+                    return jsonDownloader.get()
+                            .uri(properties.getBaseUrl() + path)
+                            .retrieve()
+                            .bodyToMono(String.class)
+                            .flatMapMany(str -> {
+                                List<Post> list = postsListFromStr(str);
+                                blockingRepository.saveAll(list);
+                                return Flux.fromIterable(list);
+                            });
+                }).collectList();
+
+    }
+
+    @Override
+    public Mono<List<Post>> getPostsBlockingByTag(MultiValueMap<String, String> keywordsMap) {
+        List<Post> posts = new ArrayList<>();
+        for(String k: keywordsMap.get("keywords"))
+            posts.addAll(blockingRepository.findByTag(k));
+
+        return Mono.just(posts);
     }
 
     public String paramsStringExceptKeyword(MultiValueMap<String, String> params){

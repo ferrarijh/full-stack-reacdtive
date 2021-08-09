@@ -12,10 +12,12 @@ public interface PixabayPostService {
     public Flux<Post> getAllPosts();
     public Flux<Post> getAllPosts(int page, int size);
     public Mono<Post> getPostById(String id);
-    public Flux<Post> getPostsBy(String query, String page, String size);
+    public Flux<Post> getPostsByTag(MultiValueMap<String, String> keywordsMap);
     public Mono<String> saveImage(String url) throws Exception;
     public Flux<Post> updatePosts(MultiValueMap<String, String> map);
-    public List<Post> updatePostsBlocking(MultiValueMap<String, String> map);
     public Mono<String> getAllPostsCount();
     public Mono<Void> deleteAllPosts();
+
+    public Mono<List<Post>> getPostsBlockingByTag(MultiValueMap<String, String> keywordsMap);
+    public Mono<List<Post>> updatePostsBlocking(MultiValueMap<String, String> map);
 }

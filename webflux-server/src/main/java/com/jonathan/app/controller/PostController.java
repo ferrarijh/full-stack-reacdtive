@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("posts")
@@ -27,17 +29,14 @@ public class PostController {
 
     @CrossOrigin
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Post> getPostsBy(@RequestParam(value="query", required=false)String query,
-                                 @RequestParam(value="page", required=false) String page,
-                                 @RequestParam(value="size", required=false) String size
-                                 ){
-        return service.getPostsBy(query, page, size);
+    public Flux<Post> getPostsByTags(@RequestParam MultiValueMap<String, String> keywordsMap){
+        return service.getPostsByTag(keywordsMap);
     }
 
     @CrossOrigin
     @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<Post> getPostsBlockingBy(@RequestParam(value="query", required=false)String query){
-        return service.getPostsBy(query, null, null);
+    public Mono<List<Post>> getPostsBlockingByTag(MultiValueMap<String, String> keywordsMap){
+        return service.getPostsBlockingByTag(keywordsMap);
     }
 
     @CrossOrigin
@@ -47,7 +46,7 @@ public class PostController {
     }
 
     @CrossOrigin
-    @GetMapping(path="/updatePosts", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path="/updatePosts", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<Post> updatePosts(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
         return service.updatePosts(paramsMap);
     }
@@ -60,11 +59,9 @@ public class PostController {
 
     @CrossOrigin
     @GetMapping(path="/updatePosts/sync", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<Post> updatePostsBlocking(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
-        logger.info("updatePostsBlocking...");
-        return service.updatePosts(paramsMap);
-//        TODO("bean of type 'com.jonathan.app.repo.PixabayRepositoryBlocking' that could not be found.")
-//        return service.updatePostsBlocking(paramsMap);
+    public Mono<List<Post>> updatePostsBlocking(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
+//        logger.info("updatePostsBlocking...");
+        return service.updatePostsBlocking(paramsMap);
     }
 
     @CrossOrigin

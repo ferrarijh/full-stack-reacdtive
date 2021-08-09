@@ -38,15 +38,18 @@ function App() {
     )
   }
 
-  const handleSubmitMongoAsync = (query) => (e) => {
+  const handleSubmitMongoAsync = (queries) => (e) => {
     e.preventDefault()
     setPosts([])
     setLoadingStatus(LoadingStatus.LOADING)
 
     var queryUrl = springBaseUrl;
-    if (query !== '')
-      queryUrl += '/?query=' + query
-    else
+    if (queries !== ''){
+      queryUrl += '?'
+      let keywords = queries.split(',')
+      keywords.forEach(k => queryUrl += "keywords="+k+"&")
+      queryUrl = queryUrl.substr(0, queryUrl.length-1)
+    }else
       queryUrl += '/all'
 
     const observable$ = sseObservable(queryUrl)
@@ -65,14 +68,18 @@ function App() {
     setPosts([])
   }
 
-  const handleSubmitMongoSync = (query) => (e) => {
+  const handleSubmitMongoSync = (queries) => (e) => {
     e.preventDefault();
     setPosts([]);
     setLoadingStatus(LoadingStatus.LOADING)
 
-    var queryUrl = springBaseUrl
-    if (query !== '')
-      queryUrl += '/sync/?query=' + query
+    var queryUrl = springBaseUrl+'/sync'
+    if (queries !== ''){
+      queryUrl += '?'
+      let keywords = queries.split(',')
+      keywords.forEach(k => queryUrl += "keywords="+k+"&")
+      queryUrl = queryUrl.substr(0, queryUrl.length-1)
+    }
     else
       queryUrl += '/all'
 
