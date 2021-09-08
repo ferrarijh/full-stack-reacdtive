@@ -28,6 +28,12 @@ public class PostController {
     }
 
     @CrossOrigin
+    @GetMapping(path="/all/sync", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Post> getAllPostsBlocking() throws InterruptedException{
+        return service.getAllPostsBlocking();
+    }
+
+    @CrossOrigin
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Post> getPostsByTags(@RequestParam MultiValueMap<String, String> keywordsMap){
         return service.getPostsByTag(keywordsMap);
@@ -35,7 +41,7 @@ public class PostController {
 
     @CrossOrigin
     @GetMapping(path="/sync", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<List<Post>> getPostsBlockingByTag(MultiValueMap<String, String> keywordsMap){
+    public List<Post> getPostsBlockingByTag(@RequestParam MultiValueMap<String, String> keywordsMap) throws InterruptedException{
         return service.getPostsBlockingByTag(keywordsMap);
     }
 
@@ -46,8 +52,15 @@ public class PostController {
     }
 
     @CrossOrigin
-    @GetMapping(path="/updatePosts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<Post> updatePosts(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
+    @GetMapping(path="/updatePosts/sync", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<List<Post>> updatePostsBlocking(@RequestParam MultiValueMap<String, String> paramsMap) throws InterruptedException {
+//        logger.info("updatePostsBlocking...");
+        return service.updatePostsBlocking(paramsMap);
+    }
+
+    @CrossOrigin
+    @GetMapping(path="/updatePosts", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Post> updatePosts(@RequestParam MultiValueMap<String, String> paramsMap) {
         return service.updatePosts(paramsMap);
     }
 
@@ -55,13 +68,6 @@ public class PostController {
     @GetMapping(path="/count", produces=MediaType.TEXT_HTML_VALUE)
     public Mono<String> countPosts(){
         return service.getAllPostsCount();
-    }
-
-    @CrossOrigin
-    @GetMapping(path="/updatePosts/sync", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<List<Post>> updatePostsBlocking(@RequestParam MultiValueMap<String, String> paramsMap) throws Exception {
-//        logger.info("updatePostsBlocking...");
-        return service.updatePostsBlocking(paramsMap);
     }
 
     @CrossOrigin

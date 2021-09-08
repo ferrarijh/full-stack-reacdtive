@@ -53,7 +53,7 @@ const Header = (props) => {
                 <br/><input type="submit" value="Get"/>
             </form>
             <br/>
-            <button onClick={handleDelete}>💣Remove All Data💣</button>
+            <button onClick={handleDelete}>💣Clear DB💣</button>
             {deleteStatus === LoadingStatus.LOADING && <label>  bombing...</label>}
         </div>
     )

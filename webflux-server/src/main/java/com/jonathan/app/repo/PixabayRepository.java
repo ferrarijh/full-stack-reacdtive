@@ -15,4 +15,5 @@ public interface PixabayRepository extends ReactiveMongoRepository<Post, String>
 
     @Query("{ id: { $exists: true }}")
     Flux<Post> findPage(Pageable pageable);
+
 }

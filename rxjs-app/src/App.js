@@ -53,6 +53,7 @@ function App() {
       queryUrl += '/all'
 
     const observable$ = sseObservable(queryUrl)
+    // const observable$ = ajaxObservable(queryUrl)
 
     observable$.subscribe({
       next: jsonArr => { 
@@ -73,15 +74,15 @@ function App() {
     setPosts([]);
     setLoadingStatus(LoadingStatus.LOADING)
 
-    var queryUrl = springBaseUrl+'/sync'
+    var queryUrl = springBaseUrl
     if (queries !== ''){
-      queryUrl += '?'
+      queryUrl += '/sync?'
       let keywords = queries.split(',')
       keywords.forEach(k => queryUrl += "keywords="+k+"&")
       queryUrl = queryUrl.substr(0, queryUrl.length-1)
     }
     else
-      queryUrl += '/all'
+      queryUrl += '/all/sync'
 
     const observable$ = ajaxObservable(queryUrl)
     observable$.subscribe({
@@ -121,6 +122,7 @@ function App() {
     queryUrl += 'page=' + options.page + "&per_page=" + options.size + "&key=" + options.key
 
     let observable$ = options.syncOrAsync === 'async' ? sseObservable(queryUrl) : ajaxObservable(queryUrl)
+    // let observable$ = ajaxObservable(queryUrl)
 
     observable$.subscribe({
       next: data => {

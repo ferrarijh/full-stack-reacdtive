@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.util.MimeType;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Configuration
 public class AppConfig {
 //    @Bean
@@ -26,4 +29,9 @@ public class AppConfig {
     public Gson gson(){
         return new Gson();
     }
+
+//    @Bean
+//    public ExecutorService blockingExecutor(){
+//        return Executors.newFixedThreadPool(200);
+//    }
 }
