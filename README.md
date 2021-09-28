@@ -4,7 +4,7 @@ Full stack reactive project with apps implementing React, Rxjs, Spring WebFlux, 
 ## Demo
 
 <div>
-	<img src="https://github.com/ferrarijh/full-stack-reactive/blob/master/demo/demo-1.gif">
+	<img src="https://github.com/ferrarijh/full-stack-reactive/blob/master/demo/demo-2.gif">
 </div>
 
 In the left pane react-rxjs app requests mongodb through spring-webflux server asynchronously, while in the right the request is handled synchronously.
