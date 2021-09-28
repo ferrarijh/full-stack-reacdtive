@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  db: 
+    hostname: mongohost
+    image: mongo:latest
+    ports: 
+      - 27017:27017
+
+  webflux-server:
+    hostname: webfluxhost
+    build: ./webflux-server
+    ports: 
+      - 8080:8080
+
+  rxjs-app:
+    hostname: rxjshost
+    build: ./rxjs-app
+    ports: 
+      - 3000:3000
+    depends_on:
+      - webflux-server

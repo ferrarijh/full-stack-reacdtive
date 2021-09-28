@@ -11,7 +11,9 @@
 **/coverage
 
 # production
-**/build
+# ignore all files in the /../../build/ directory
+**/build/
+**/target/
 
 # misc
 .DS_Store
@@ -29,4 +31,3 @@ Key.java
 
 web-server/
 webflux-server-test/
-webflux-server/target
