@@ -1,6 +1,10 @@
 # Full Stack Reactive Project
 Full stack reactive project with apps implementing React, Rxjs, Spring WebFlux, MongoDB. Pixabay API key is required to fetch initial data from the API and push it to MongoDB. The project consists of React application and Spring application. Additionally, MongoDB is required to run full simulation.
 
+<div>
+	<img src="https://github.com/ferrarijh/full-stack-reactive/blob/master/demo/full-stack.jpg">
+</div>
+
 This project supports docker compose. Build `webflux-server` with maven and then run `docker compose up -d` to instantly run all necessary services.
 
 ## Demo
